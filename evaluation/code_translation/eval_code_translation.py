@@ -212,12 +212,9 @@ def main():
     parent_path = (
         f'{os.environ["DUMP_FOLDER"]}/oai/code_translation_n_sample_20/'
     )
-    debug_compiler = "GNU C++17"
     for split in ("compact", "compact_small"):
-        # for split in ("compact_small",):
         path = os.path.join(parent_path, split)
         for k, debug_compiler in LANG_CLUSTER_TO_LANG_COMPILER.items():
-            # input_path = os.path.join(path, "eval_prog_syn_val")
             output_path = os.path.join(path, f"eval_code_translation_{split}_execeval")
             os.makedirs(output_path, exist_ok=True)
             output_file = os.path.join(output_path, f"{debug_compiler}.jsonl")
@@ -245,7 +242,6 @@ def main():
                             ]
                             if compiler != debug_compiler:
                                 continue
-                            # print(compiler, debug_compiler)
                             all_samples.append(sample)
                         future_to_val_results = {
                             thread_executor.submit(process, args)
@@ -256,12 +252,12 @@ def main():
                             total=len(all_samples),
                             desc=f"{debug_compiler}",
                         ):
-                            try:
-                                __out = _out.result()
-                                jwp.write(__out)
-                            except Exception as emsg:
-                                print("Exception msg: {}".format(emsg))
-                                pass
+                            # try:
+                            __out = _out.result()
+                            jwp.write(__out)
+                            # except Exception as emsg:
+                                # print("Exception msg: {}".format(emsg))
+                                # pass
 
 
 if __name__ == "__main__":

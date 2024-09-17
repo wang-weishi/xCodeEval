@@ -89,7 +89,7 @@ def gen(prompt, temperature, nsample):
 
 xcodeeval_prompt_template = {
     "program_synthesis": [
-        "Write a program in {{lang_cluster}} to solve this programming problem:\nDescription: {{prob_desc_description}}\nInput Specification: {{prob_desc_input_spec}}\nOutput Specification: {{prob_desc_output_spec}}\n{% for input, output in zip(prob_desc_sample_inputs, prob_desc_sample_outputs) %}\nSample Input:\n{{input}}\nSample Output:\n{{output}}\n{% endfor %}\nNotes: {{prob_desc_notes}}\nTake input from {{prob_desc_input_from}} and output to {{prob_desc_output_to}}\nProvide the {{lang_cluster}} code without any extra description or tokens. Target code: ||END-of-SRC|| {{source_code}}",
+        "Write a program in {{lang_cluster}} to solve this programming problem:\nDescription: {{prob_desc_description}}\nInput Specification: {{prob_desc_input_spec}}\nOutput Specification: {{prob_desc_output_spec}}\n{% for input, output in zip(prob_desc_sample_inputs, prob_desc_sample_outputs) %}\nSample Input:\n{{input}}\nSample Output:\n{{output}}\n{% endfor %}\nNotes: {{prob_desc_notes}}\nTake input from {{prob_desc_input_from}} and output to {{prob_desc_output_to}}\nProvide the {{lang_cluster}} code without any extra description or tokens. Target code: ||END-of-SRC|| ",
     ]
 }
 
@@ -116,7 +116,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--output-dir",
-        default="dumped",
+        default="dumped/oai/program_synthesis_n_sample_20",
         help="Output Folder to save the API request.",
     )
     parser.add_argument(

@@ -89,7 +89,7 @@ def gen(prompt, temperature, nsample):
 
 xcodeeval_prompt_template = {
     "apr": [
-        "Fix a buggy program written in {{lang_cluster}} language to solve the following programming problem:\nDescription: {{prob_desc_description}}\nInput Specification: {{prob_desc_input_spec}}\nOutput Specification: {{prob_desc_output_spec}}\n{% for input, output in zip(prob_desc_sample_inputs, prob_desc_sample_outputs) %}\nSample Input:\n{{input}}\nSample Output:\n{{output}}\n{% endfor %}\nNotes: {{prob_desc_notes}}\nTake input from {{prob_desc_input_from}} and output to {{prob_desc_output_to}}\n\nHere is the code with a bug of {{bug_exec_outcome}}:\n\n{{bug_source_code}}\n\nProvide the fixed {{lang_cluster}} code without any description or extra tokens.\n\nFixed source code:\n ||END-of-SRC|| {{fixed_source_code}}"
+        "Fix a buggy program written in {{lang_cluster}} language to solve the following programming problem:\nDescription: {{prob_desc_description}}\nInput Specification: {{prob_desc_input_spec}}\nOutput Specification: {{prob_desc_output_spec}}\n{% for input, output in zip(prob_desc_sample_inputs, prob_desc_sample_outputs) %}\nSample Input:\n{{input}}\nSample Output:\n{{output}}\n{% endfor %}\nNotes: {{prob_desc_notes}}\nTake input from {{prob_desc_input_from}} and output to {{prob_desc_output_to}}\n\nHere is the code with a bug of {{bug_exec_outcome}}:\n\n{{bug_source_code}}\n\nProvide the fixed {{lang_cluster}} code without any description or extra tokens.\n\nFixed source code:\n ||END-of-SRC|| "
     ]
 }
 
@@ -114,7 +114,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--output-dir",
-        default="dumped",
+        default="dumped/oai/apr_n_sample_20",
         help="Output Folder to save the API request.",
     )
     parser.add_argument(

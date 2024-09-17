@@ -89,7 +89,7 @@ def gen(prompt, temperature, nsample):
 
 xcodeeval_prompt_template = {
     "code_translation": [
-        "Here is code in {{source_lang}} programming lanaguge. Translate the following code from {{source_lang}} to {{target_lang}} programming lanaguge. Do not output any extra description or tokens other than the translated code. \n\n{{source_code}}||END-of-SRC|| {{target_code}}"
+        "Here is code in {{source_lang}} programming lanaguge. Translate the following code from {{source_lang}} to {{target_lang}} programming lanaguge. Do not output any extra description or tokens other than the translated code. \n\n{{source_code}}||END-of-SRC|| "
     ]
 }
 
@@ -118,7 +118,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--output-dir",
-        default="dumped",
+        default="dumped/oai/code_translation_n_sample_20",
         help="Output Folder to save the API request.",
     )
     parser.add_argument(
