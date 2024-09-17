@@ -2,7 +2,9 @@
 [xCodeEval: A Large Scale Multilingual Multitask Benchmark for Code Understanding, Generation, Translation and Retrieval](https://arxiv.org/abs/2303.03004)
 
 # Update:
+
 - September 18, 2024: Evaluation code for generative tasks released. [Follow it here](#evaluation)
+- Nov 7, 2023: A sample eval script is [here](https://github.com/ntunlp/xCodeEval/pull/8).
 - July 13, 2023: StarEncode retrieval model released. [Follow it here](#additional-resources)
 - Jul 6, 2023: [ExecEval](https://github.com/ntunlp/ExecEval) has been updated with changes for java, kotlin, go. Please `git pull`, `docker build`, `docker run` for latest updates.
 
@@ -191,5 +193,17 @@ This repository is under [MIT](https://github.com/ntunlp/xCodeEval/blob/main/LIC
       eprint={2303.03004},
       archivePrefix={arXiv},
       primaryClass={cs.CL}
+}
+```
+
+Part of this work was submitted as a requirement for the Master of Science degree in Computer Science and Applications at the Islamic University of Technology by Muhammad Abdullah Matin Khan Zarzis. (The thesis or project report will be added upon publication).
+
+```
+@misc{khan2024xcodeeval,
+      title={Development of a Code Search Engine Using Natural Language Processing Techniques}, 
+      author={Mohammad Abdullah Matin Khan},
+      year={2024},
+      publication={Journal of Engineering and Technology (JET)}
+      url=TBA
 }
 ```
