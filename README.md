@@ -79,7 +79,7 @@ We propose 7 Tasks.
 7. [NL-Code Retrieval](./retrieval.md)
 
 # Evaluation
-For details on evaluation please follow instructions from [evaluation/README.md](./evaluation/README.md)
+For details on evaluation please follow instructions from [evaluation/README.md](./evaluation/README.md).
 
 # Common Data for different tasks
 
