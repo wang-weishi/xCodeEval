@@ -53,7 +53,7 @@ def estimate_pass_at_k(
 
 
 def get_execeval_out_file_name(split_name, compiler):
-    return os.path.join(path, split_name, f"{compiler}.jsonl")
+    return os.path.join(path, split_name, "eval_code_translation_compact_small_execeval", f"{compiler}.jsonl")
 
 
 # construct result as {[task_id]: [unit_test_results]}
