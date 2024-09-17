@@ -88,18 +88,16 @@ def gen(prompt, temperature, nsample):
 
 
 xcodeeval_prompt_template = {
-    "program_synthesis": [
-        "Write a program in {{lang_cluster}} to solve this programming problem:\nDescription: {{prob_desc_description}}\nInput Specification: {{prob_desc_input_spec}}\nOutput Specification: {{prob_desc_output_spec}}\n{% for input, output in zip(prob_desc_sample_inputs, prob_desc_sample_outputs) %}\nSample Input:\n{{input}}\nSample Output:\n{{output}}\n{% endfor %}\nNotes: {{prob_desc_notes}}\nTake input from {{prob_desc_input_from}} and output to {{prob_desc_output_to}}\nProvide the {{lang_cluster}} code without any extra description or tokens. Target code: ||END-of-SRC|| {{source_code}}",
+    "apr": [
+        "Fix a buggy program written in {{lang_cluster}} language to solve the following programming problem:\nDescription: {{prob_desc_description}}\nInput Specification: {{prob_desc_input_spec}}\nOutput Specification: {{prob_desc_output_spec}}\n{% for input, output in zip(prob_desc_sample_inputs, prob_desc_sample_outputs) %}\nSample Input:\n{{input}}\nSample Output:\n{{output}}\n{% endfor %}\nNotes: {{prob_desc_notes}}\nTake input from {{prob_desc_input_from}} and output to {{prob_desc_output_to}}\n\nHere is the code with a bug of {{bug_exec_outcome}}:\n\n{{bug_source_code}}\n\nProvide the fixed {{lang_cluster}} code without any description or extra tokens.\n\nFixed source code:\n ||END-of-SRC|| {{fixed_source_code}}"
     ]
 }
 
 
-def process_prompt(
-    dt, temperature, nsample, language, template, output_dir, index, dry_run=0
-):
+def process_prompt(dt, temperature, template, nsample, output_dir, index, dry_run=0):
+    language = dt["lang_cluster"]
     file_path = os.path.join(output_dir, f"{index}_{temperature}_{language}.json")
     if not os.path.exists(file_path):
-        dt["lang_cluster"] = language
         dt["prob_desc_sample_inputs"] = json.loads(dt["prob_desc_sample_inputs"])
         dt["prob_desc_sample_outputs"] = json.loads(dt["prob_desc_sample_outputs"])
         lm_io = template.apply(dt)
@@ -139,49 +137,45 @@ def main():
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir, exist_ok=True)
     templates = [
-        Template(f"prog_syn_{idx}", template, "xCodeEval", delimeter="||END-of-SRC||")
-        for idx, template in enumerate(xcodeeval_prompt_template["program_synthesis"])
+        Template(f"apr_{idx}", template, "xCodeEval", delimeter="||END-of-SRC||")
+        for idx, template in enumerate(xcodeeval_prompt_template["apr"])
     ]
     template = templates[0]
 
-    prog_synthesis_dataset = datasets.load_dataset(
-        "NTU-NLP-sg/xCodeEval", "program_synthesis", num_proc=16, trust_remote_code=True
-    )["compact"]
+    apr_dataset = datasets.load_dataset("NTU-NLP-sg/xCodeEval", "apr", num_proc=16, trust_remote_code=True)["compact"]
     # temperature_list = np.linspace(0, 2, args.nsample)
     temperature_list = [0.3157894736842105]
-    for language in LANGS:
-        with concurrent.futures.ProcessPoolExecutor(
-            max_workers=int(args.num_proc)
-        ) as executor:
-            futures = []
-            for idx, dt in tqdm.tqdm(
-                enumerate(prog_synthesis_dataset),
-                total=len(prog_synthesis_dataset),
-                desc=f"Preparing samples {language} lang",
-            ):
-                for temperature in temperature_list:
-                    future = executor.submit(
-                        process_prompt,
-                        dt,
-                        temperature,
-                        args.nsample,
-                        language,
-                        template,
-                        args.output_dir,
-                        idx,
-                        args.dry_run,
-                    )
-                    futures.append(future)
+    with concurrent.futures.ProcessPoolExecutor(
+        max_workers=int(args.num_proc)
+    ) as executor:
+        futures = []
+        for idx, dt in tqdm.tqdm(
+            enumerate(apr_dataset),
+            total=len(apr_dataset),
+            desc=f"Preparing samples lang",
+        ):
+            for temperature in temperature_list:
+                future = executor.submit(
+                    process_prompt,
+                    dt,
+                    temperature,
+                    template,
+                    args.nsample,
+                    args.output_dir,
+                    idx,
+                    args.dry_run,
+                )
+                futures.append(future)
 
-            for future in tqdm.tqdm(
-                concurrent.futures.as_completed(futures),
-                total=len(futures),
-                desc=f"Calling OpenAI API for {language} lang",
-            ):
-                try:
-                    future.result()
-                except Exception as e:
-                    print(f"Error occurred: {e}")
+        for future in tqdm.tqdm(
+            concurrent.futures.as_completed(futures),
+            total=len(futures),
+            desc=f"Calling OpenAI API",
+        ):
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Error occurred: {e}")
 
 
 if __name__ == "__main__":

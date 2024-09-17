@@ -88,18 +88,20 @@ def gen(prompt, temperature, nsample):
 
 
 xcodeeval_prompt_template = {
-    "program_synthesis": [
-        "Write a program in {{lang_cluster}} to solve this programming problem:\nDescription: {{prob_desc_description}}\nInput Specification: {{prob_desc_input_spec}}\nOutput Specification: {{prob_desc_output_spec}}\n{% for input, output in zip(prob_desc_sample_inputs, prob_desc_sample_outputs) %}\nSample Input:\n{{input}}\nSample Output:\n{{output}}\n{% endfor %}\nNotes: {{prob_desc_notes}}\nTake input from {{prob_desc_input_from}} and output to {{prob_desc_output_to}}\nProvide the {{lang_cluster}} code without any extra description or tokens. Target code: ||END-of-SRC|| {{source_code}}",
+    "code_translation": [
+        "Here is code in {{source_lang}} programming lanaguge. Translate the following code from {{source_lang}} to {{target_lang}} programming lanaguge. Do not output any extra description or tokens other than the translated code. \n\n{{source_code}}||END-of-SRC|| {{target_code}}"
     ]
 }
 
 
 def process_prompt(
-    dt, temperature, nsample, language, template, output_dir, index, dry_run=0
+    dt, temperature, template, language, nsample, output_dir, index, dry_run=0
 ):
+    dt["source_lang"] = dt["lang"]
+    dt["target_lang"] = language
+    language = f"{dt['source_lang']}--{dt['target_lang']}"
     file_path = os.path.join(output_dir, f"{index}_{temperature}_{language}.json")
     if not os.path.exists(file_path):
-        dt["lang_cluster"] = language
         dt["prob_desc_sample_inputs"] = json.loads(dt["prob_desc_sample_inputs"])
         dt["prob_desc_sample_outputs"] = json.loads(dt["prob_desc_sample_outputs"])
         lm_io = template.apply(dt)
@@ -139,49 +141,102 @@ def main():
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir, exist_ok=True)
     templates = [
-        Template(f"prog_syn_{idx}", template, "xCodeEval", delimeter="||END-of-SRC||")
-        for idx, template in enumerate(xcodeeval_prompt_template["program_synthesis"])
+        Template(
+            f"code_translation_{idx}", template, "xCodeEval", delimeter="||END-of-SRC||"
+        )
+        for idx, template in enumerate(xcodeeval_prompt_template["code_translation"])
     ]
     template = templates[0]
 
-    prog_synthesis_dataset = datasets.load_dataset(
-        "NTU-NLP-sg/xCodeEval", "program_synthesis", num_proc=16, trust_remote_code=True
-    )["compact"]
-    # temperature_list = np.linspace(0, 2, args.nsample)
+    code_translation_dataset_small = datasets.load_dataset(
+        "NTU-NLP-sg/xCodeEval", "code_translation", num_proc=16, trust_remote_code=True
+    )[
+        "compact_small"
+    ]
+    code_translation_dataset = datasets.load_dataset(
+        "NTU-NLP-sg/xCodeEval", "code_translation", num_proc=16
+    )[
+        "compact"
+    ]
     temperature_list = [0.3157894736842105]
-    for language in LANGS:
-        with concurrent.futures.ProcessPoolExecutor(
-            max_workers=int(args.num_proc)
-        ) as executor:
-            futures = []
-            for idx, dt in tqdm.tqdm(
-                enumerate(prog_synthesis_dataset),
-                total=len(prog_synthesis_dataset),
-                desc=f"Preparing samples {language} lang",
-            ):
+
+    out_dir = args.output_dir + "/compact_small"
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir, exist_ok=True)
+    with concurrent.futures.ProcessPoolExecutor(
+        max_workers=int(args.num_proc)
+    ) as executor:
+        futures = []
+        for idx, dt in tqdm.tqdm(
+            enumerate(code_translation_dataset_small),
+            total=len(code_translation_dataset_small),
+            desc=f"Preparing samples",
+        ):
+            for language in LANGS:
+                if SHORT_LANG_MAP[dt["lang"]] == language:
+                    continue
                 for temperature in temperature_list:
                     future = executor.submit(
                         process_prompt,
                         dt,
                         temperature,
-                        args.nsample,
-                        language,
                         template,
-                        args.output_dir,
+                        language,
+                        args.nsample,
+                        out_dir,
                         idx,
                         args.dry_run,
                     )
                     futures.append(future)
 
-            for future in tqdm.tqdm(
-                concurrent.futures.as_completed(futures),
-                total=len(futures),
-                desc=f"Calling OpenAI API for {language} lang",
-            ):
-                try:
-                    future.result()
-                except Exception as e:
-                    print(f"Error occurred: {e}")
+        for future in tqdm.tqdm(
+            concurrent.futures.as_completed(futures),
+            total=len(futures),
+            desc=f"Calling OpenAI API",
+        ):
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Error occurred: {e}")
+
+    out_dir = args.output_dir + "/compact"
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir, exist_ok=True)
+    with concurrent.futures.ProcessPoolExecutor(
+        max_workers=int(args.num_proc)
+    ) as executor:
+        futures = []
+        for idx, dt in tqdm.tqdm(
+            enumerate(code_translation_dataset),
+            total=len(code_translation_dataset),
+            desc=f"Preparing samples",
+        ):
+            for language in ["Python"]:
+                if SHORT_LANG_MAP[dt["lang"]] == language:
+                    continue
+                for temperature in temperature_list:
+                    future = executor.submit(
+                        process_prompt,
+                        dt,
+                        temperature,
+                        template,
+                        language,
+                        args.nsample,
+                        out_dir,
+                        idx,
+                        args.dry_run,
+                    )
+                    futures.append(future)
+
+        for future in tqdm.tqdm(
+            concurrent.futures.as_completed(futures),
+            total=len(futures),
+            desc=f"Calling OpenAI API",
+        ):
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Error occurred: {e}")
 
 
 if __name__ == "__main__":
