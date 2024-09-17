@@ -2,6 +2,7 @@
 [xCodeEval: A Large Scale Multilingual Multitask Benchmark for Code Understanding, Generation, Translation and Retrieval](https://arxiv.org/abs/2303.03004)
 
 # Update:
+- September 18, 2024: Evaluation code for generative tasks released. [Follow it here](#evaluation)
 - July 13, 2023: StarEncode retrieval model released. [Follow it here](#additional-resources)
 - Jul 6, 2023: [ExecEval](https://github.com/ntunlp/ExecEval) has been updated with changes for java, kotlin, go. Please `git pull`, `docker build`, `docker run` for latest updates.
 
