@@ -6,7 +6,22 @@ Follow the instrauction [here](https://github.com/ntunlp/execeval).
 
 > :warning: ❌ Do not run ExecEval without Docker image
 
-`Java` and `Kotlin 1.5` has a lots of Memory related issue. If you don't have large amount of memory please reduce the multiple worker. If you are running in a laptop or Desktop with limited amount of RAM (~ 32 GB), please use num `NUM_WORKERS`=1.
+`Java` and `Kotlin 1.5` has a lots of Memory related issue. If you don't have large amount of memory please reduce the multiple worker. If you are running in a laptop or Desktop with limited amount of RAM (~ 32 GB), please use num `NUM_WORKERS`=1. Performance holds well upto 1/3rd of the CPU available at max.
+
+## Setup Environment
+Install python packages in your own environment.
+```
+cd evaluation
+pip install -r requirement.txt
+```
+
+Install ExecEval.
+```
+git clone https://github.com/ntunlp/ExecEval
+cd ExecEval
+docker build . -t exec-eval:1.0
+docker run -it -p 5000:5000 -e NUM_WORKERS=37 exec-eval:1.0
+```
 
 ## Generate samples
 
