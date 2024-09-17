@@ -22,7 +22,7 @@ LANG_CLUSTER_TO_LANG_COMPILER = {
 
 path = f'{os.environ["DUMP_FOLDER"]}/oai/apr_n_sample_20/'
 output_path = os.path.join(
-    path, "reproduce_1"
+    path, "eval_apr_val_execeval"
 )  
 ks = range(1, 21)
 
@@ -56,7 +56,7 @@ def estimate_pass_at_k(
 
 
 def get_execeval_out_file_name(compiler):
-    return os.path.join(output_path, "eval_apr_val_execeval", f"{compiler}.jsonl")
+    return os.path.join(output_path, f"{compiler}.jsonl")
 
 
 # construct result as {[task_id]: [unit_test_results]}
