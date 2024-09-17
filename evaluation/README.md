@@ -11,7 +11,6 @@ Follow the instrauction [here](https://github.com/ntunlp/execeval).
 ## Setup Environment
 Install python packages in your own environment.
 ```
-cd evaluation
 pip install -r requirement.txt
 ```
 
